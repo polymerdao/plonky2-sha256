@@ -308,8 +308,8 @@ fn add_biguint_2limbs<F: RichField + Extendable<D>, const D: usize>(
     }
 }
 
-// padded_msg_len = block_count x 1024 bits
-// Size: msg_len_in_bits (L) |  p bits   | 128 bits
+// padded_msg_len = block_count x 512 bits
+// Size: msg_len_in_bits (L) |  p bits   | 64 bits
 // Bits:      msg            | 100...000 |    L
 pub fn make_circuits<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
@@ -317,9 +317,9 @@ pub fn make_circuits<F: RichField + Extendable<D>, const D: usize>(
 ) -> Sha256Targets {
     let mut message = Vec::new();
     let mut digest = Vec::new();
-    let block_count = (msg_len_in_bits + 129 + 1023) / 1024;
-    let padded_msg_len = 1024 * block_count;
-    let p = padded_msg_len - 128 - msg_len_in_bits;
+    let block_count = (msg_len_in_bits + 65 + 511) / 512;
+    let padded_msg_len = 512 * block_count;
+    let p = padded_msg_len - 64 - msg_len_in_bits;
     assert!(p > 1);
 
     for _ in 0..msg_len_in_bits {
@@ -329,8 +329,8 @@ pub fn make_circuits<F: RichField + Extendable<D>, const D: usize>(
     for _ in 0..p - 1 {
         message.push(builder.constant_bool(false));
     }
-    for i in 0..128 {
-        let b = ((msg_len_in_bits as u128) >> (127 - i)) & 1;
+    for i in 0..64 {
+        let b = ((msg_len_in_bits as u64) >> (63 - i)) & 1;
         message.push(builder.constant_bool(b == 1));
     }
 
