@@ -6,28 +6,19 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-plonky2 = { git = "https://github.com/mir-protocol/plonky2", rev = "8c275c49" }
-plonky2_util = { git = "https://github.com/mir-protocol/plonky2", rev = "8c275c49" }
-plonky2_field = { git = "https://github.com/mir-protocol/plonky2", rev = "8c275c49" }
-plonky2_u32 = { git = "https://github.com/mir-protocol/plonky2", rev = "8c275c49" }
-itertools = "0.10.0"
-rayon = "1.5.1"
-serde = { version = "1.0", features = ["derive"] }
+plonky2 = { git = "https://github.com/polymerdao/plonky2", rev = "7165acbe" }
+plonky2_util = { git = "https://github.com/polymerdao/plonky2", rev = "7165acbe" }
+plonky2_field = { git = "https://github.com/polymerdao/plonky2", rev = "7165acbe" }
+plonky2_u32 = { git = "https://github.com/polymerdao/plonky2", rev = "7165acbe" }
 anyhow = "1.0.40"
-log = "0.4.14"
-num = { version = "0.4", features = ["rand"] }
-rand = "0.8.4"
-rand_chacha = "0.3.1"
-unroll = "0.1.5"
 keccak-hash = "0.8.0"
-static_assertions = "1.1.0"
+itertools = "0.10.0"
+log = "0.4.14"
 sha2 = "0.10"
 env_logger = "0.9.0"
 
 [profile.release]
 opt-level = 3
-#lto = "fat"
-#codegen-units = 1
 
 [profile.bench]
 opt-level = 3
