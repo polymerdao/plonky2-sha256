@@ -10,13 +10,14 @@ Run benchmarks
 RUSTFLAGS=-Ctarget-cpu=native cargo run --release --package plonky2_sha256 --bin plonky2_sha256
 ```
 
-Benchmark on a Macbook Pro (M1), preimage message size = 128 (block count = 3)
+Benchmark on a Macbook Pro (M1), preimage message size = 2828 (block count = 45)
 
 ```console
-Constructing inner proof with 17474 gates
-[INFO  plonky2::plonk::circuit_builder] Degree before blinding & padding: 17513
-[INFO  plonky2::plonk::circuit_builder] Degree after blinding & padding: 32768
-[DEBUG plonky2::plonk::circuit_builder] Building circuit took 1.6326365s
-[DEBUG plonky2::util::timing] 1.8551s to prove
-[DEBUG plonky2::util::timing] 0.0053s to verify
+block count: 45
+Constructing inner proof with 261980 gates
+[INFO  plonky2::plonk::circuit_builder] Degree before blinding & padding: 262019
+[INFO  plonky2::plonk::circuit_builder] Degree after blinding & padding: 262144
+[DEBUG plonky2::plonk::circuit_builder] Building circuit took 14.396462s
+[DEBUG plonky2::util::timing] 16.7942s to prove
+[DEBUG plonky2::util::timing] 0.0064s to verify
 ```
