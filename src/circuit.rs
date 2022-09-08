@@ -1,42 +1,36 @@
-use crate::split_base::CircuitBuilderSplit;
-use num::bigint::BigUint;
-use num::FromPrimitive;
 use plonky2::hash::hash_types::RichField;
 use plonky2::iop::target::BoolTarget;
 use plonky2::plonk::circuit_builder::CircuitBuilder;
-use plonky2_ecdsa::gadgets::biguint::{BigUintTarget, CircuitBuilderBiguint};
 use plonky2_field::extension::Extendable;
 use plonky2_u32::gadgets::arithmetic_u32::{CircuitBuilderU32, U32Target};
 
+use crate::split_base::CircuitBuilderSplit;
+
 #[rustfmt::skip]
-pub const H512_512: [u64; 8] = [
-    0x6a09e667f3bcc908, 0xbb67ae8584caa73b, 0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
-    0x510e527fade682d1, 0x9b05688c2b3e6c1f, 0x1f83d9abfb41bd6b, 0x5be0cd19137e2179,
+pub const H256: [u32; 8] = [
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 ];
 
-/// Constants necessary for SHA-512 family of digests.
+/// Constants necessary for SHA-256 family of digests.
 #[rustfmt::skip]
-pub const K64: [u64; 80] = [
-    0x428a2f98d728ae22, 0x7137449123ef65cd, 0xb5c0fbcfec4d3b2f, 0xe9b5dba58189dbbc,
-    0x3956c25bf348b538, 0x59f111f1b605d019, 0x923f82a4af194f9b, 0xab1c5ed5da6d8118,
-    0xd807aa98a3030242, 0x12835b0145706fbe, 0x243185be4ee4b28c, 0x550c7dc3d5ffb4e2,
-    0x72be5d74f27b896f, 0x80deb1fe3b1696b1, 0x9bdc06a725c71235, 0xc19bf174cf692694,
-    0xe49b69c19ef14ad2, 0xefbe4786384f25e3, 0x0fc19dc68b8cd5b5, 0x240ca1cc77ac9c65,
-    0x2de92c6f592b0275, 0x4a7484aa6ea6e483, 0x5cb0a9dcbd41fbd4, 0x76f988da831153b5,
-    0x983e5152ee66dfab, 0xa831c66d2db43210, 0xb00327c898fb213f, 0xbf597fc7beef0ee4,
-    0xc6e00bf33da88fc2, 0xd5a79147930aa725, 0x06ca6351e003826f, 0x142929670a0e6e70,
-    0x27b70a8546d22ffc, 0x2e1b21385c26c926, 0x4d2c6dfc5ac42aed, 0x53380d139d95b3df,
-    0x650a73548baf63de, 0x766a0abb3c77b2a8, 0x81c2c92e47edaee6, 0x92722c851482353b,
-    0xa2bfe8a14cf10364, 0xa81a664bbc423001, 0xc24b8b70d0f89791, 0xc76c51a30654be30,
-    0xd192e819d6ef5218, 0xd69906245565a910, 0xf40e35855771202a, 0x106aa07032bbd1b8,
-    0x19a4c116b8d2d0c8, 0x1e376c085141ab53, 0x2748774cdf8eeb99, 0x34b0bcb5e19b48a8,
-    0x391c0cb3c5c95a63, 0x4ed8aa4ae3418acb, 0x5b9cca4f7763e373, 0x682e6ff3d6b2b8a3,
-    0x748f82ee5defb2fc, 0x78a5636f43172f60, 0x84c87814a1f0ab72, 0x8cc702081a6439ec,
-    0x90befffa23631e28, 0xa4506cebde82bde9, 0xbef9a3f7b2c67915, 0xc67178f2e372532b,
-    0xca273eceea26619c, 0xd186b8c721c0c207, 0xeada7dd6cde0eb1e, 0xf57d4f7fee6ed178,
-    0x06f067aa72176fba, 0x0a637dc5a2c898a6, 0x113f9804bef90dae, 0x1b710b35131c471b,
-    0x28db77f523047d84, 0x32caab7b40c72493, 0x3c9ebe0a15c9bebc, 0x431d67c49c100d4c,
-    0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817,
+pub const K256: [u32; 64] = [
+    0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
+    0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
+    0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3,
+    0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
+    0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC,
+    0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
+    0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7,
+    0xC6E00BF3, 0xD5A79147, 0x06CA6351, 0x14292967,
+    0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13,
+    0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85,
+    0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3,
+    0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070,
+    0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5,
+    0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
+    0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208,
+    0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
 ];
 
 pub struct Sha256Targets {
@@ -56,57 +50,47 @@ pub fn array_to_bits(bytes: &[u8]) -> Vec<bool> {
     ret
 }
 
-pub fn biguint_to_bits_target<F: RichField + Extendable<D>, const D: usize, const B: usize>(
+pub fn u32_to_bits_target<F: RichField + Extendable<D>, const D: usize, const B: usize>(
     builder: &mut CircuitBuilder<F, D>,
-    a: &BigUintTarget,
+    a: &U32Target,
 ) -> Vec<BoolTarget> {
     let mut res = Vec::new();
-    for i in (0..a.num_limbs()).rev() {
-        let bit_targets = builder.split_le_base::<B>(a.get_limb(i).0, 32);
-        for j in (0..32).rev() {
-            res.push(BoolTarget::new_unsafe(bit_targets[j]));
-        }
+    let bit_targets = builder.split_le_base::<B>(a.0, 32);
+    for i in (0..32).rev() {
+        res.push(BoolTarget::new_unsafe(bit_targets[i]));
     }
     res
 }
 
-pub fn bits_to_biguint_target<F: RichField + Extendable<D>, const D: usize>(
+pub fn bits_to_u32_target<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
     bits_target: Vec<BoolTarget>,
-) -> BigUintTarget {
+) -> U32Target {
     let bit_len = bits_target.len();
-    assert_eq!(bit_len % 32, 0);
-
-    let mut u32_targets = Vec::new();
-    for i in 0..bit_len / 32 {
-        u32_targets.push(U32Target(
-            builder.le_sum(bits_target[i * 32..(i + 1) * 32].iter().rev()),
-        ));
-    }
-    u32_targets.reverse();
-    BigUintTarget { limbs: u32_targets }
+    assert_eq!(bit_len, 32);
+    U32Target(builder.le_sum(bits_target[0..32].iter().rev()))
 }
 
-// define ROTATE(x, y)  (((x)>>(y)) | ((x)<<(64-(y))))
-fn rotate64(y: usize) -> Vec<usize> {
+// define ROTATE(x, y)  (((x)>>(y)) | ((x)<<(32-(y))))
+fn rotate32(y: usize) -> Vec<usize> {
     let mut res = Vec::new();
-    for i in 64 - y..64 {
+    for i in 32 - y..32 {
         res.push(i);
     }
-    for i in 0..64 - y {
+    for i in 0..32 - y {
         res.push(i);
     }
     res
 }
 
 // x>>y
-// Assume: 0 at index 64
-fn shift64(y: usize) -> Vec<usize> {
+// Assume: 0 at index 32
+fn shift32(y: usize) -> Vec<usize> {
     let mut res = Vec::new();
-    for _ in 64 - y..64 {
-        res.push(64);
+    for _ in 32 - y..32 {
+        res.push(32);
     }
-    for i in 0..64 - y {
+    for i in 0..32 - y {
         res.push(i);
     }
     res
@@ -140,90 +124,90 @@ fn xor3<F: RichField + Extendable<D>, const D: usize>(
     BoolTarget::new_unsafe(builder.sub(res, two_m))
 }
 
-//define Sigma0(x)    (ROTATE((x),28) ^ ROTATE((x),34) ^ ROTATE((x),39))
+//#define Sigma0(x)    (ROTATE((x), 2) ^ ROTATE((x),13) ^ ROTATE((x),22))
 fn big_sigma0<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
-    a: &BigUintTarget,
-) -> BigUintTarget {
-    let a_bits = biguint_to_bits_target::<F, D, 2>(builder, a);
-    let rotate28 = rotate64(28);
-    let rotate34 = rotate64(34);
-    let rotate39 = rotate64(39);
+    a: &U32Target,
+) -> U32Target {
+    let a_bits = u32_to_bits_target::<F, D, 2>(builder, a);
+    let rotate2 = rotate32(2);
+    let rotate13 = rotate32(13);
+    let rotate22 = rotate32(22);
     let mut res_bits = Vec::new();
-    for i in 0..64 {
+    for i in 0..32 {
         res_bits.push(xor3(
             builder,
-            a_bits[rotate28[i]],
-            a_bits[rotate34[i]],
-            a_bits[rotate39[i]],
+            a_bits[rotate2[i]],
+            a_bits[rotate13[i]],
+            a_bits[rotate22[i]],
         ));
     }
-    bits_to_biguint_target(builder, res_bits)
+    bits_to_u32_target(builder, res_bits)
 }
 
-//define Sigma1(x)    (ROTATE((x),14) ^ ROTATE((x),18) ^ ROTATE((x),41))
+//#define Sigma1(x)    (ROTATE((x), 6) ^ ROTATE((x),11) ^ ROTATE((x),25))
 fn big_sigma1<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
-    a: &BigUintTarget,
-) -> BigUintTarget {
-    let a_bits = biguint_to_bits_target::<F, D, 2>(builder, a);
-    let rotate28 = rotate64(14);
-    let rotate34 = rotate64(18);
-    let rotate39 = rotate64(41);
+    a: &U32Target,
+) -> U32Target {
+    let a_bits = u32_to_bits_target::<F, D, 2>(builder, a);
+    let rotate6 = rotate32(6);
+    let rotate11 = rotate32(11);
+    let rotate25 = rotate32(25);
     let mut res_bits = Vec::new();
-    for i in 0..64 {
+    for i in 0..32 {
         res_bits.push(xor3(
             builder,
-            a_bits[rotate28[i]],
-            a_bits[rotate34[i]],
-            a_bits[rotate39[i]],
+            a_bits[rotate6[i]],
+            a_bits[rotate11[i]],
+            a_bits[rotate25[i]],
         ));
     }
-    bits_to_biguint_target(builder, res_bits)
+    bits_to_u32_target(builder, res_bits)
 }
 
-//define sigma0(x)    (ROTATE((x), 1) ^ ROTATE((x), 8) ^ ((x)>> 7))
+//#define sigma0(x)    (ROTATE((x), 7) ^ ROTATE((x),18) ^ ((x)>> 3))
 fn sigma0<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
-    a: &BigUintTarget,
-) -> BigUintTarget {
-    let mut a_bits = biguint_to_bits_target::<F, D, 2>(builder, a);
+    a: &U32Target,
+) -> U32Target {
+    let mut a_bits = u32_to_bits_target::<F, D, 2>(builder, a);
     a_bits.push(builder.constant_bool(false));
-    let rotate1 = rotate64(1);
-    let rotate8 = rotate64(8);
-    let shift7 = shift64(7);
+    let rotate7 = rotate32(7);
+    let rotate18 = rotate32(18);
+    let shift3 = shift32(3);
     let mut res_bits = Vec::new();
-    for i in 0..64 {
+    for i in 0..32 {
         res_bits.push(xor3(
             builder,
-            a_bits[rotate1[i]],
-            a_bits[rotate8[i]],
-            a_bits[shift7[i]],
+            a_bits[rotate7[i]],
+            a_bits[rotate18[i]],
+            a_bits[shift3[i]],
         ));
     }
-    bits_to_biguint_target(builder, res_bits)
+    bits_to_u32_target(builder, res_bits)
 }
 
-//define sigma1(x)    (ROTATE((x),19) ^ ROTATE((x),61) ^ ((x)>> 6))
+//#define sigma1(x)    (ROTATE((x),17) ^ ROTATE((x),19) ^ ((x)>>10))
 fn sigma1<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
-    a: &BigUintTarget,
-) -> BigUintTarget {
-    let mut a_bits = biguint_to_bits_target::<F, D, 2>(builder, a);
+    a: &U32Target,
+) -> U32Target {
+    let mut a_bits = u32_to_bits_target::<F, D, 2>(builder, a);
     a_bits.push(builder.constant_bool(false));
-    let rotate19 = rotate64(19);
-    let rotate61 = rotate64(61);
-    let shift6 = shift64(6);
+    let rotate17 = rotate32(17);
+    let rotate19 = rotate32(19);
+    let shift10 = shift32(10);
     let mut res_bits = Vec::new();
-    for i in 0..64 {
+    for i in 0..32 {
         res_bits.push(xor3(
             builder,
+            a_bits[rotate17[i]],
             a_bits[rotate19[i]],
-            a_bits[rotate61[i]],
-            a_bits[shift6[i]],
+            a_bits[shift10[i]],
         ));
     }
-    bits_to_biguint_target(builder, res_bits)
+    bits_to_u32_target(builder, res_bits)
 }
 
 /*
@@ -232,21 +216,21 @@ ch = a&b ^ (!a)&c
  */
 fn ch<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
-    a: &BigUintTarget,
-    b: &BigUintTarget,
-    c: &BigUintTarget,
-) -> BigUintTarget {
-    let a_bits = biguint_to_bits_target::<F, D, 2>(builder, a);
-    let b_bits = biguint_to_bits_target::<F, D, 2>(builder, b);
-    let c_bits = biguint_to_bits_target::<F, D, 2>(builder, c);
+    a: &U32Target,
+    b: &U32Target,
+    c: &U32Target,
+) -> U32Target {
+    let a_bits = u32_to_bits_target::<F, D, 2>(builder, a);
+    let b_bits = u32_to_bits_target::<F, D, 2>(builder, b);
+    let c_bits = u32_to_bits_target::<F, D, 2>(builder, c);
     let mut res_bits = Vec::new();
-    for i in 0..64 {
+    for i in 0..32 {
         let b_sub_c = builder.sub(b_bits[i].target, c_bits[i].target);
         let a_mul_b_sub_c = builder.mul(a_bits[i].target, b_sub_c);
         let a_mul_b_sub_c_add_c = builder.add(a_mul_b_sub_c, c_bits[i].target);
         res_bits.push(BoolTarget::new_unsafe(a_mul_b_sub_c_add_c));
     }
-    bits_to_biguint_target(builder, res_bits)
+    bits_to_u32_target(builder, res_bits)
 }
 
 /*
@@ -258,15 +242,15 @@ where m = b*c
  */
 fn maj<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
-    a: &BigUintTarget,
-    b: &BigUintTarget,
-    c: &BigUintTarget,
-) -> BigUintTarget {
-    let a_bits = biguint_to_bits_target::<F, D, 2>(builder, a);
-    let b_bits = biguint_to_bits_target::<F, D, 2>(builder, b);
-    let c_bits = biguint_to_bits_target::<F, D, 2>(builder, c);
+    a: &U32Target,
+    b: &U32Target,
+    c: &U32Target,
+) -> U32Target {
+    let a_bits = u32_to_bits_target::<F, D, 2>(builder, a);
+    let b_bits = u32_to_bits_target::<F, D, 2>(builder, b);
+    let c_bits = u32_to_bits_target::<F, D, 2>(builder, c);
     let mut res_bits = Vec::new();
-    for i in 0..64 {
+    for i in 0..32 {
         let m = builder.mul(b_bits[i].target, c_bits[i].target);
         let two = builder.two();
         let two_m = builder.mul(two, m);
@@ -277,35 +261,16 @@ fn maj<F: RichField + Extendable<D>, const D: usize>(
 
         res_bits.push(BoolTarget::new_unsafe(res));
     }
-    bits_to_biguint_target(builder, res_bits)
+    bits_to_u32_target(builder, res_bits)
 }
 
-fn add_biguint_2limbs<F: RichField + Extendable<D>, const D: usize>(
+fn add_u32<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
-    a: &BigUintTarget,
-    b: &BigUintTarget,
-) -> BigUintTarget {
-    assert_eq!(a.num_limbs(), 2);
-    assert_eq!(b.num_limbs(), 2);
-
-    let mut combined_limbs = vec![];
-    let mut carry = builder.zero_u32();
-    for i in 0..2 {
-        let a_limb = (i < a.num_limbs())
-            .then(|| a.limbs[i])
-            .unwrap_or_else(|| builder.zero_u32());
-        let b_limb = (i < b.num_limbs())
-            .then(|| b.limbs[i])
-            .unwrap_or_else(|| builder.zero_u32());
-
-        let (new_limb, new_carry) = builder.add_many_u32(&[carry, a_limb, b_limb]);
-        carry = new_carry;
-        combined_limbs.push(new_limb);
-    }
-
-    BigUintTarget {
-        limbs: combined_limbs,
-    }
+    a: &U32Target,
+    b: &U32Target,
+) -> U32Target {
+    let (res, _carry) = builder.add_u32(*a, *b);
+    res
 }
 
 // padded_msg_len = block_count x 512 bits
@@ -313,7 +278,7 @@ fn add_biguint_2limbs<F: RichField + Extendable<D>, const D: usize>(
 // Bits:      msg            | 100...000 |    L
 pub fn make_circuits<F: RichField + Extendable<D>, const D: usize>(
     builder: &mut CircuitBuilder<F, D>,
-    msg_len_in_bits: u128,
+    msg_len_in_bits: u64,
 ) -> Sha256Targets {
     let mut message = Vec::new();
     let mut digest = Vec::new();
@@ -337,12 +302,12 @@ pub fn make_circuits<F: RichField + Extendable<D>, const D: usize>(
     // init states
     let mut state = Vec::new();
     for i in 0..8 {
-        state.push(builder.constant_biguint(&BigUint::from_u64(H512_512[i]).unwrap()));
+        state.push(builder.constant_u32(H256[i]));
     }
 
-    let mut k512 = Vec::new();
+    let mut k256 = Vec::new();
     for i in 0..80 {
-        k512.push(builder.constant_biguint(&BigUint::from_u64(K64[i]).unwrap()));
+        k256.push(builder.constant_u32(K256[i]));
     }
 
     for blk in 0..block_count {
@@ -357,85 +322,77 @@ pub fn make_circuits<F: RichField + Extendable<D>, const D: usize>(
         let mut h = state[7].clone();
 
         for i in 0..16 {
-            let index = blk as usize * 1024 + i * 64;
-            let u32_0 = builder.le_sum(message[index..index + 32].iter().rev());
-            let u32_1 = builder.le_sum(message[index + 32..index + 64].iter().rev());
+            let index = blk as usize * 512 + i * 32;
+            let u32_target = builder.le_sum(message[index..index + 32].iter().rev());
 
-            let mut u32_targets = Vec::new();
-            u32_targets.push(U32Target(u32_1));
-            u32_targets.push(U32Target(u32_0));
-            let big_int = BigUintTarget { limbs: u32_targets };
-
-            x.push(big_int);
+            x.push(U32Target(u32_target));
             let mut t1 = h.clone();
             let big_sigma1_e = big_sigma1(builder, &e);
-            t1 = add_biguint_2limbs(builder, &t1, &big_sigma1_e);
+            t1 = add_u32(builder, &t1, &big_sigma1_e);
             let ch_e_f_g = ch(builder, &e, &f, &g);
-            t1 = add_biguint_2limbs(builder, &t1, &ch_e_f_g);
-            t1 = add_biguint_2limbs(builder, &t1, &k512[i]);
-            t1 = add_biguint_2limbs(builder, &t1, &x[i]);
+            t1 = add_u32(builder, &t1, &ch_e_f_g);
+            t1 = add_u32(builder, &t1, &k256[i]);
+            t1 = add_u32(builder, &t1, &x[i]);
 
             let mut t2 = big_sigma0(builder, &a);
             let maj_a_b_c = maj(builder, &a, &b, &c);
-            t2 = add_biguint_2limbs(builder, &t2, &maj_a_b_c);
+            t2 = add_u32(builder, &t2, &maj_a_b_c);
 
             h = g;
             g = f;
             f = e;
-            e = add_biguint_2limbs(builder, &d, &t1);
+            e = add_u32(builder, &d, &t1);
             d = c;
             c = b;
             b = a;
-            a = add_biguint_2limbs(builder, &t1, &t2);
+            a = add_u32(builder, &t1, &t2);
         }
 
         for i in 16..80 {
             let s0 = sigma0(builder, &x[(i + 1) & 0x0f]);
             let s1 = sigma1(builder, &x[(i + 14) & 0x0f]);
 
-            let s0_add_s1 = add_biguint_2limbs(builder, &s0, &s1);
-            let s0_add_s1_add_x = add_biguint_2limbs(builder, &s0_add_s1, &x[(i + 9) & 0xf]);
-            x[i & 0xf] = add_biguint_2limbs(builder, &x[i & 0xf], &s0_add_s1_add_x);
+            let s0_add_s1 = add_u32(builder, &s0, &s1);
+            let s0_add_s1_add_x = add_u32(builder, &s0_add_s1, &x[(i + 9) & 0xf]);
+            x[i & 0xf] = add_u32(builder, &x[i & 0xf], &s0_add_s1_add_x);
 
             let big_sigma0_a = big_sigma0(builder, &a);
             let big_sigma1_e = big_sigma1(builder, &e);
             let ch_e_f_g = ch(builder, &e, &f, &g);
             let maj_a_b_c = maj(builder, &a, &b, &c);
 
-            let h_add_sigma1 = add_biguint_2limbs(builder, &h, &big_sigma1_e);
-            let h_add_sigma1_add_ch_e_f_g = add_biguint_2limbs(builder, &h_add_sigma1, &ch_e_f_g);
-            let h_add_sigma1_add_ch_e_f_g_add_k512 =
-                add_biguint_2limbs(builder, &h_add_sigma1_add_ch_e_f_g, &k512[i]);
+            let h_add_sigma1 = add_u32(builder, &h, &big_sigma1_e);
+            let h_add_sigma1_add_ch_e_f_g = add_u32(builder, &h_add_sigma1, &ch_e_f_g);
+            let h_add_sigma1_add_ch_e_f_g_add_k256 =
+                add_u32(builder, &h_add_sigma1_add_ch_e_f_g, &k256[i]);
 
-            let t1 = add_biguint_2limbs(builder, &x[i & 0xf], &h_add_sigma1_add_ch_e_f_g_add_k512);
-            let t2 = add_biguint_2limbs(builder, &big_sigma0_a, &maj_a_b_c);
+            let t1 = add_u32(builder, &x[i & 0xf], &h_add_sigma1_add_ch_e_f_g_add_k256);
+            let t2 = add_u32(builder, &big_sigma0_a, &maj_a_b_c);
 
             h = g;
             g = f;
             f = e;
-            e = add_biguint_2limbs(builder, &d, &t1);
+            e = add_u32(builder, &d, &t1);
             d = c;
             c = b;
             b = a;
-            a = add_biguint_2limbs(builder, &t1, &t2);
+            a = add_u32(builder, &t1, &t2);
         }
 
-        state[0] = add_biguint_2limbs(builder, &state[0], &a);
-        state[1] = add_biguint_2limbs(builder, &state[1], &b);
-        state[2] = add_biguint_2limbs(builder, &state[2], &c);
-        state[3] = add_biguint_2limbs(builder, &state[3], &d);
-        state[4] = add_biguint_2limbs(builder, &state[4], &e);
-        state[5] = add_biguint_2limbs(builder, &state[5], &f);
-        state[6] = add_biguint_2limbs(builder, &state[6], &g);
-        state[7] = add_biguint_2limbs(builder, &state[7], &h);
+        state[0] = add_u32(builder, &state[0], &a);
+        state[1] = add_u32(builder, &state[1], &b);
+        state[2] = add_u32(builder, &state[2], &c);
+        state[3] = add_u32(builder, &state[3], &d);
+        state[4] = add_u32(builder, &state[4], &e);
+        state[5] = add_u32(builder, &state[5], &f);
+        state[6] = add_u32(builder, &state[6], &g);
+        state[7] = add_u32(builder, &state[7], &h);
     }
 
     for i in 0..8 {
-        for j in (0..2).rev() {
-            let bit_targets = builder.split_le_base::<2>(state[i].get_limb(j).0, 32);
-            for k in (0..32).rev() {
-                digest.push(BoolTarget::new_unsafe(bit_targets[k]));
-            }
+        let bit_targets = builder.split_le_base::<2>(state[i].0, 32);
+        for j in (0..32).rev() {
+            digest.push(BoolTarget::new_unsafe(bit_targets[j]));
         }
     }
 
@@ -444,13 +401,14 @@ pub fn make_circuits<F: RichField + Extendable<D>, const D: usize>(
 
 #[cfg(test)]
 mod tests {
-    use crate::circuit::{array_to_bits, make_circuits};
     use anyhow::Result;
     use plonky2::iop::witness::{PartialWitness, Witness};
     use plonky2::plonk::circuit_builder::CircuitBuilder;
     use plonky2::plonk::circuit_data::CircuitConfig;
     use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
     use rand::Rng;
+
+    use crate::circuit::{array_to_bits, make_circuits};
 
     const EXPECTED_RES: [u8; 512] = [
         0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1,
@@ -486,7 +444,7 @@ mod tests {
         type C = PoseidonGoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let mut builder = CircuitBuilder::<F, D>::new(CircuitConfig::standard_recursion_config());
-        let targets = make_circuits(&mut builder, len as u128);
+        let targets = make_circuits(&mut builder, len as u64);
         let mut pw = PartialWitness::new();
 
         for i in 0..len {
@@ -521,7 +479,7 @@ mod tests {
         type C = PoseidonGoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let mut builder = CircuitBuilder::<F, D>::new(CircuitConfig::standard_recursion_config());
-        let targets = make_circuits(&mut builder, len as u128);
+        let targets = make_circuits(&mut builder, len as u64);
         let mut pw = PartialWitness::new();
 
         for i in 0..len {
