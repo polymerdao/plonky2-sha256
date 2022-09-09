@@ -6,10 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-plonky2 = { git = "https://github.com/polymerdao/plonky2", rev = "9c4e4ed5" }
-plonky2_util = { git = "https://github.com/polymerdao/plonky2", rev = "9c4e4ed5" }
-plonky2_field = { git = "https://github.com/polymerdao/plonky2", rev = "9c4e4ed5" }
-plonky2_u32 = { git = "https://github.com/polymerdao/plonky2", rev = "9c4e4ed5" }
+plonky2 = { git = "https://github.com/polymerdao/plonky2", rev = "cde86248" }
+plonky2_util = { git = "https://github.com/polymerdao/plonky2", rev = "cde86248" }
+plonky2_field = { git = "https://github.com/polymerdao/plonky2", rev = "cde86248" }
+plonky2_u32 = { git = "https://github.com/polymerdao/plonky2", rev = "cde86248" }
 anyhow = "1.0.40"
 keccak-hash = "0.8.0"
 itertools = "0.10.0"
