@@ -10,7 +10,7 @@ use plonky2::gates::base_sum::BaseSumGate;
 use plonky2::hash::hash_types::RichField;
 use plonky2::iop::generator::{GeneratedValues, SimpleGenerator};
 use plonky2::iop::target::{BoolTarget, Target};
-use plonky2::iop::witness::{PartitionWitness, Witness};
+use plonky2::iop::witness::{PartitionWitness, Witness, WitnessWrite};
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 
 pub trait CircuitBuilderSplit<F: RichField + Extendable<D>, const D: usize> {

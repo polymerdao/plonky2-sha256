@@ -1,6 +1,6 @@
 use anyhow::Result;
 use log::{Level, LevelFilter};
-use plonky2::iop::witness::{PartialWitness, Witness};
+use plonky2::iop::witness::{PartialWitness, WitnessWrite};
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 use plonky2::plonk::circuit_data::CircuitConfig;
 use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};

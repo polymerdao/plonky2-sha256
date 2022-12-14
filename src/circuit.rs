@@ -288,7 +288,7 @@ pub fn make_circuits<F: RichField + Extendable<D>, const D: usize>(
     assert!(p > 1);
 
     for _ in 0..msg_len_in_bits {
-        message.push(builder.add_virtual_bool_target());
+        message.push(builder.add_virtual_bool_target_unsafe());
     }
     message.push(builder.constant_bool(true));
     for _ in 0..p - 1 {
@@ -402,7 +402,7 @@ pub fn make_circuits<F: RichField + Extendable<D>, const D: usize>(
 #[cfg(test)]
 mod tests {
     use anyhow::Result;
-    use plonky2::iop::witness::{PartialWitness, Witness};
+    use plonky2::iop::witness::{PartialWitness, WitnessWrite};
     use plonky2::plonk::circuit_builder::CircuitBuilder;
     use plonky2::plonk::circuit_data::CircuitConfig;
     use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
