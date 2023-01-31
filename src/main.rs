@@ -30,10 +30,9 @@ pub fn prove_sha256(msg: &[u8]) -> Result<()> {
 
     let expected_res = array_to_bits(hash.as_slice());
     for i in 0..expected_res.len() {
-        if expected_res[i] {
-            builder.assert_one(targets.digest[i].target);
-        } else {
-            builder.assert_zero(targets.digest[i].target);
+        match expected_res[i] {
+            true => builder.assert_one(targets.digest[i].target),
+            false => builder.assert_zero(targets.digest[i].target),
         }
     }
 
