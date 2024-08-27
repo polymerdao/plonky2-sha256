@@ -4,8 +4,6 @@ use plonky2::iop::target::BoolTarget;
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 use plonky2_crypto::u32::gadgets::arithmetic_u32::{CircuitBuilderU32, U32Target};
 
-use crate::split_base::CircuitBuilderSplit;
-
 #[rustfmt::skip]
 pub const H256: [u32; 8] = [
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
