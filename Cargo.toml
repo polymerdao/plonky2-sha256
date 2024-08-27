@@ -6,10 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-plonky2 = { git = "https://github.com/polymerdao/plonky2", rev = "4cb0b48df1d227d5461a4c28ed025aaea64e2e62" }
-plonky2_util = { git = "https://github.com/polymerdao/plonky2", rev = "4cb0b48df1d227d5461a4c28ed025aaea64e2e62" }
-plonky2_field = { git = "https://github.com/polymerdao/plonky2", rev = "4cb0b48df1d227d5461a4c28ed025aaea64e2e62" }
-plonky2_u32 = { git = "https://github.com/polymerdao/plonky2", rev = "4cb0b48df1d227d5461a4c28ed025aaea64e2e62" }
+plonky2 = "0.2.2"
+plonky2_crypto = { git = "https://github.com/Lagrange-Labs/plonky2-crypto" }
 anyhow = "1.0.40"
 keccak-hash = "0.10.0"
 itertools = "0.10.0"
@@ -17,6 +15,9 @@ log = "0.4.14"
 sha2 = "0.10"
 env_logger = "0.10.0"
 rand = "0.8.4"
+
+[patch.crates-io]
+plonky2 = { git = "https://github.com/Lagrange-Labs/plonky2", branch = "upstream" }
 
 [profile.release]
 opt-level = 3
